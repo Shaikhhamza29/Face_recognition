@@ -65,3 +65,4 @@ Face_recognition/
 git clone https://github.com/Shaikhhamza29/Face_recognition.git
 cd Face_recognition
 
+
