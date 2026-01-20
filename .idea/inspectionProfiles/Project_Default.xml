@@ -1,0 +1,25 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="tqdm" />
+          <option value="argparse" />
+          <option value="joblib" />
+          <option value="opencv-python" />
+          <option value="scikit-image" />
+          <option value="onnx" />
+          <option value="onnxruntime" />
+          <option value="onnxruntime-gpu" />
+          <option value="tensorflow-GPU" />
+          <option value="numpy" />
+          <option value="pillow" />
+          <option value="tf2onnx" />
+          <option value="coremltools" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
