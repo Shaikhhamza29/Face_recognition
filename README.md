@@ -30,17 +30,6 @@ This project follows the **standard face recognition pipeline**:
 
 ---
 
-## 📂 Project Structure
-
-Face_recognition/
-
-── main.py # Main application
-── faces/ # Stored face embeddings (.npy)
-── requirements.txt # Python dependencies
-── README.md # Project documentation
-── .gitignore
----
-
 ## ⚙️ Requirements
 
 - Python **3.7+**
@@ -64,6 +53,7 @@ Face_recognition/
 ```bash
 git clone https://github.com/Shaikhhamza29/Face_recognition.git
 cd Face_recognition
+
 
 
 
