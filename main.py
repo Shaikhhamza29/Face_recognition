@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import simpledialog
 
 # ---------------- CONFIG ----------------
-CAMERA_INDEX = 0
+CAMERA_INDEX = 1
 SIM_THRESHOLD = 0.55
 FACE_DIR = "faces"
 os.makedirs(FACE_DIR, exist_ok=True)
@@ -19,10 +19,10 @@ app = FaceAnalysis(
 )
 app.prepare(ctx_id=0, det_size=(640, 640))
 
-
+# ---------------- UI ----------------
 def popup_input_name():
     root = tk.Tk()
-    root.withdraw()              # Hide main window
+    root.withdraw()
     root.attributes("-topmost", True)
     name = simpledialog.askstring("Save Face", "Enter person name:")
     root.destroy()
@@ -32,7 +32,20 @@ def popup_input_name():
 def cosine_similarity(a, b):
     return np.dot(a, b) / (norm(a) * norm(b))
 
-known_faces = []  # [{name, embedding}]
+def is_front_face(face, max_ratio=0.35):
+    """
+    Rejects side faces using eye-nose geometry
+    """
+    left_eye, right_eye, nose = face.kps[0], face.kps[1], face.kps[2]
+
+    eye_dist = abs(right_eye[0] - left_eye[0])
+    nose_offset = abs(nose[0] - (left_eye[0] + right_eye[0]) / 2)
+
+    ratio = nose_offset / eye_dist
+    return ratio < max_ratio
+
+# ---------------- LOAD KNOWN FACES ----------------
+known_faces = []
 
 def load_known_faces():
     for file in os.listdir(FACE_DIR):
@@ -57,6 +70,24 @@ while True:
     faces = app.get(frame)
 
     for face in faces:
+
+        x1, y1, x2, y2 = map(int, face.bbox)
+
+        # ❌ SIDE FACE → UNKNOWN
+        if not is_front_face(face):
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(
+                frame,
+                "Unknown",
+                (x1, y1 - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 0, 255),
+                2
+            )
+            continue
+
+        # ✔ FRONT FACE → RECOGNITION
         emb = face.embedding
         name = "Unknown"
         best_sim = 0
@@ -67,11 +98,10 @@ while True:
                 best_sim = sim
                 name = person["name"]
 
-        x1, y1, x2, y2 = map(int, face.bbox)
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv2.putText(
             frame,
-            f"{name}",
+            name,
             (x1, y1 - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.8,
@@ -80,12 +110,15 @@ while True:
         )
 
     cv2.imshow("Face Recognition", frame)
-
     key = cv2.waitKey(1) & 0xFF
 
-    # SAVE NEW FACE
+    # ---------------- SAVE FACE ----------------
     if key == ord('s') and faces:
         face = faces[0]
+
+        if not is_front_face(face):
+            print("❌ Please face the camera directly")
+            continue
 
         name = popup_input_name()
         if not name:
